@@ -1,0 +1,49 @@
+(ns app.core
+  (:require [reagent.core :as r]
+            [reagent.dom :as rdom]
+            [clojure.string :as str]))
+
+
+(defonce timer (r/atom (js/Date.)))
+
+(defonce time-color (r/atom "#f34"))
+
+(defonce time-updater (js/setInterval
+                       #(reset! timer (js/Date.)) 1000))
+
+(defn greeting [message]
+  [:h1 message])
+
+(defn clock []
+  (let [time-str (-> @timer .toTimeString (str/split " ") first)]
+    [:div.example-clock
+     {:style {:color @time-color}}
+     time-str]))
+
+(defn color-input []
+  [:div.color-input
+   "Time color: "
+   [:input {:type "text"
+            :value @time-color
+            :on-change #(reset! time-color (-> % .-target .-value))}]])
+
+(defn simple-example []
+  [:div
+   [greeting "Hello world, it is now"]
+   [clock]
+   [color-input]])
+
+(defn run []
+  (rdom/render [simple-example] (js/document.getElementById "root")))
+
+
+;; Exported methods
+; On init
+(defn ^:export init [] (run))
+
+; On reload
+(defn ^:dev/after-load start [] (run))
+
+;; optional
+;(defn ^:dev/before-load stop []
+;  (js/console.log "stop"))a
